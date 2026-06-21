@@ -1,0 +1,36 @@
+name: Probe PSRepositories.xml
+
+on:
+  workflow_dispatch:
+    inputs:
+      runner_label:
+        description: Windows runner image to test.
+        required: true
+        type: choice
+        default: windows-2025
+        options:
+          - windows-2025
+          - windows-2022
+
+jobs:
+  test:
+    name: Test
+    runs-on: ${{ inputs.runner_label }}
+    strategy:
+      matrix:
+        shell: [powershell, pwsh]
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+    steps:
+      - name: Test
+        run: |
+          $configPath = Join-Path $env:LOCALAPPDATA 'Microsoft\Windows\PowerShell\PowerShellGet\PSRepositories.xml'
+          $configExist = Test-Path -LiteralPath $configPath
+          Write-Output "`$configPath: $configPath"
+          Write-Output "`$configExist: $configExist"
+
+          Write-Output "$(Get-PSRepository -Name PSGallery)"
+
+          $configExist = Test-Path -LiteralPath $configPath
+          Write-Output "`$configExist: $configExist"
